@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Sample_data;
 use DataTables;
+use Validator;
 
 class SampleController extends Controller
 {
@@ -21,8 +22,8 @@ class SampleController extends Controller
             $data = Sample_data::latest()->get();
             return DataTables::of($data)
                     ->addColumn('action',function($data){
-                        $button = '<button name="edit" id="'.$data->id.'" class="m-2 btn btn-primary">Edit</button>';
-                        $button .= '<button name="delete" id="'.$data->id.'" class="m-2 btn btn-danger">Delete</button>';
+                        $button = '<button name="edit" id="'.$data->id.'" class="ml-2 mr-2 btn btn-primary">Edit</button>';
+                        $button .= '<button name="delete" id="'.$data->id.'" class="ml-2 mr-2 btn btn-danger">Delete</button>';
                  
                         return $button;
                     })
@@ -34,25 +35,35 @@ class SampleController extends Controller
 
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+    
     public function store(Request $request)
     {
-        //
+        $rules = array(
+            'first_name' => 'required',
+            'last_name'  =>  'required',
+        );
+
+        $error = Validator::make($request->all(),$rules);
+
+        if ($error->fails())
+        {
+            return response()->json(['errors' => $error->errors()->all()]);
+        }
+
+        $form_data = array(
+            'first_name' => $request->first_name,
+            'last_name'  => $request->last_name,
+        );
+
+        Sample_data::create($form_data);
+
+        return response()->json(['success' =>'Data Added Successfully.']);
     }
 
     /**
